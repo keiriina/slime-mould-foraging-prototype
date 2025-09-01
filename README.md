@@ -22,3 +22,5 @@ conda env update --name slime --file environment.yml --prune
 ```
 python main.py
 ```
+
+Reference: [Article](https://www.nature.com/articles/s41598-022-05439-w)
