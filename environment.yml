@@ -1,0 +1,15 @@
+name: slime
+dependencies:
+    - jupyter
+    - pillow
+    - python=3.10.6
+    - pip
+    - pip:
+      - numpy
+      - matplotlib
+      - pandas
+      - geopandas
+      - networkx
+      - scipy
+      - empiricaldist
+      - osmnx
