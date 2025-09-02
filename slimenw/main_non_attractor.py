@@ -1,11 +1,10 @@
-from slime.mold import MoldSimulation
+from n_mold import MoldSimulation
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
 
 
 def main():
-    # Initialize simulation
     sim = MoldSimulation()
     
     # Add food at the same positions as the original PDE
@@ -16,11 +15,21 @@ def main():
     ]
     sim.add_food_sources(food_positions)
 
-    # Matplotlib setup
+    # Add non-attractors (obstacles) to the simulation
+    # Each non-attractor is defined by (x, y) or (x, y, strength) where strength controls repulsion power (good for customization)
+    non_attractors = [
+        (350, 350, 20),  # Strong 
+        (450, 250, 15),  # Medium 
+        (250, 450, 15),  # Medium
+        (150, 150),      # Default strength 
+        (600, 600)       # Default strength
+    ]
+    sim.add_non_attractors(non_attractors)
+
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_xlim(0, sim.width)
     ax.set_ylim(0, sim.height)
-    ax.set_title("Slime Mold Simulation")
+    ax.set_title("Slime Mold Simulation with Non-Attractors")
     ax.set_aspect("equal")
     
     # Add grid with more prominent lines
@@ -47,8 +56,29 @@ def main():
         zorder=3,
         marker="o"  
     )
+    
+    # Scatter for non-attractors - red circles with radius
+    for na in sim.non_attractors:
+        ax.scatter(
+            na.location[0], 
+            na.location[1],
+            color="red", 
+            s=80, 
+            alpha=0.7, 
+            zorder=2, 
+            marker="o"
+        )
+        # Draw radius of influence
+        circle = plt.Circle(
+            (na.location[0], na.location[1]), 
+            na.radius, 
+            fill=False, 
+            color='red', 
+            linestyle='--', 
+            alpha=0.3
+        )
+        ax.add_patch(circle)
 
-    # Create line objects for nuclei trails outside of init/update functions
     # Initially create empty lines
     lines = []
     
@@ -72,7 +102,7 @@ def main():
         return lines + [oat_scatter, nucleus_scatter]
 
     def update(frame):
-        sim.step()  # advance simulation one step
+        sim.step()
         
         nonlocal lines
         while len(lines) < len(sim.cells):
@@ -99,7 +129,7 @@ def main():
     plt.show()
 
     # Export CSV 
-    sim.export_force_grid("new.csv")
+    sim.export_force_grid("new_with_nonattractors.csv")
     print("Simulation complete. CSV exported.")
 
 

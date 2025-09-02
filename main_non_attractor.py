@@ -1,12 +1,16 @@
-from slime.mold import MoldSimulation
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
+import sys
+import os
+
+# Import the non-attractor mold simulation
+from slimenw.n_mold import MoldSimulation as NonAttractorMoldSimulation
 
 
 def main():
     # Initialize simulation
-    sim = MoldSimulation()
+    sim = NonAttractorMoldSimulation()
     
     # Add food at the same positions as the original PDE
     food_positions = [
@@ -16,11 +20,22 @@ def main():
     ]
     sim.add_food_sources(food_positions)
 
+    # Add non-attractors (obstacles) to the simulation
+    # Each non-attractor is defined by (x, y) or (x, y, strength) where strength controls repulsion power
+    non_attractors = [
+        (350, 350, 20),  # Strong obstacle in center
+        (450, 250, 15),  # Medium obstacle
+        (250, 450, 15),  # Medium obstacle
+        (150, 150),      # Default strength obstacle
+        (600, 600)       # Default strength obstacle
+    ]
+    sim.add_non_attractors(non_attractors)
+
     # Matplotlib setup
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_xlim(0, sim.width)
     ax.set_ylim(0, sim.height)
-    ax.set_title("Slime Mold Simulation")
+    ax.set_title("Slime Mold Simulation with Non-Attractors")
     ax.set_aspect("equal")
     
     # Add grid with more prominent lines
@@ -47,6 +62,28 @@ def main():
         zorder=3,
         marker="o"  
     )
+    
+    # Scatter for non-attractors - red circles with radius
+    for na in sim.non_attractors:
+        ax.scatter(
+            na.location[0], 
+            na.location[1],
+            color="red", 
+            s=80, 
+            alpha=0.7, 
+            zorder=2, 
+            marker="o"
+        )
+        # Draw radius of influence
+        circle = plt.Circle(
+            (na.location[0], na.location[1]), 
+            na.radius, 
+            fill=False, 
+            color='red', 
+            linestyle='--', 
+            alpha=0.3
+        )
+        ax.add_patch(circle)
 
     # Create line objects for nuclei trails outside of init/update functions
     # Initially create empty lines
@@ -99,7 +136,7 @@ def main():
     plt.show()
 
     # Export CSV 
-    sim.export_force_grid("new.csv")
+    sim.export_force_grid("new_with_obstacles.csv")
     print("Simulation complete. CSV exported.")
 
 
